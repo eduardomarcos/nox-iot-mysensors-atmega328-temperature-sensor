@@ -1,77 +1,51 @@
-#include <Arduino.h>
-#include <Adafruit_BMP280.h>
+#define MY_DEBUG
+#define MY_RADIO_RF24
 
-Adafruit_BMP280 bmp; // I2C
+#define MY_RF24_CHANNEL (32)
+#define MY_SECURITY_SIMPLE_PASSWD "eyvoI*yz&{RxCOtmkLY$0M[R" 
 
-long readVcc();
+#define DHT_DATA_PIN 3
+#define DHT_TYPE DHT11
+
+#include <SPI.h>
+#include <MySensors.h>
+#include <DHT.h>
+
+static const uint64_t UPDATE_INTERVAL = 7000;
+
+#define CHILD_ID_HUM 0
+#define CHILD_ID_TEMP 1
+
+MyMessage msgHum(CHILD_ID_HUM, V_HUM);
+MyMessage msgTemp(CHILD_ID_TEMP, V_TEMP);
+DHT dht(DHT_DATA_PIN, DHT_TYPE);
+
+void presentation()
+{
+  sendSketchInfo("TemperatureAndHumidity", "1.0");
+
+  present(CHILD_ID_HUM, S_HUM);
+  present(CHILD_ID_TEMP, S_TEMP);
+}
 
 void setup()
 {
-  Serial.begin(9600);
-  while (!Serial)
-  {
-    delay(10);
-  }
-
-  Serial.write("Loading...\n");
-
-  if (!bmp.begin(0x76))
-  {
-    Serial.println("BMP280 sensor not found");
-  }
-
-  pinMode(LED_BUILTIN, OUTPUT);
-  Serial.write("Loaded.\n");
+  dht.begin();
 }
 
-// the loop function runs over and over again forever
 void loop()
 {
-  float presion = bmp.readPressure() / 100;
-  float temperatura = bmp.readTemperature();
+  delay(2000);
 
-  Serial.print(F("Presion: "));
-  Serial.print(presion);
-  Serial.print(" hPa");
-  Serial.print("\t");
-  Serial.print(("Temp: "));
-  Serial.print(temperatura);
-  Serial.print(" *C");
-  Serial.print("\t");
+  float temperature = dht.readTemperature();
+  Serial.print("RAW: ");
+  Serial.println(temperature);
+  if (isnan(temperature))
+  {
+    Serial.println("Failed reading temperature from DHT!");
+  }
 
-  digitalWrite(LED_BUILTIN, HIGH); // turn the LED on (HIGH is the voltage level)
-  delay(500);                      // wait for a second
-  digitalWrite(LED_BUILTIN, LOW);  // turn the LED off by making the voltage LOW
-  delay(500);                      // wait for a second
+  send(msgTemp.set(temperature, 1));
 
-  Serial.print("Battery Vcc: ");
-  Serial.println(readVcc());
-}
-
-long readVcc()
-{
-// Read 1.1V reference against AVcc
-// set the reference to Vcc and the measurement to the internal 1.1V reference
-#if defined(__AVR_ATmega32U4__) || defined(__AVR_ATmega1280__) || defined(__AVR_ATmega2560__)
-  ADMUX = _BV(REFS0) | _BV(MUX4) | _BV(MUX3) | _BV(MUX2) | _BV(MUX1);
-#elif defined(__AVR_ATtiny24__) || defined(__AVR_ATtiny44__) || defined(__AVR_ATtiny84__)
-  ADMUX = _BV(MUX5) | _BV(MUX0);
-#elif defined(__AVR_ATtiny25__) || defined(__AVR_ATtiny45__) || defined(__AVR_ATtiny85__)
-  ADMUX = _BV(MUX3) | _BV(MUX2);
-#else
-  ADMUX = _BV(REFS0) | _BV(MUX3) | _BV(MUX2) | _BV(MUX1);
-#endif
-
-  delay(2);            // Wait for Vref to settle
-  ADCSRA |= _BV(ADSC); // Start conversion
-  while (bit_is_set(ADCSRA, ADSC))
-    ; // measuring
-
-  uint8_t low = ADCL;  // must read ADCL first - it then locks ADCH
-  uint8_t high = ADCH; // unlocks both
-
-  long result = (high << 8) | low;
-
-  result = 1125300L / result; // Calculate Vcc (in mV); 1125300 = 1.1*1023*1000
-  return result;              // Vcc in millivolts
+  sleep(UPDATE_INTERVAL);
 }
