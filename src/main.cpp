@@ -2,7 +2,7 @@
 #define MY_RADIO_RF24
 
 #define MY_RF24_CHANNEL (32)
-#define MY_SECURITY_SIMPLE_PASSWD "eyvoI*yz&{RxCOtmkLY$0M[R" 
+#define MY_SECURITY_SIMPLE_PASSWD "eyvoI*yz&{RxCOtmkLY$0M[R"
 
 #define DHT_DATA_PIN 3
 #define DHT_TYPE DHT11
