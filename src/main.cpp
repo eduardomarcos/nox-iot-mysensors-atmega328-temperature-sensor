@@ -1,8 +1,10 @@
 #define MY_DEBUG
 #define MY_RADIO_RF24
 
-#define MY_RF24_CHANNEL (32)
-#define MY_SECURITY_SIMPLE_PASSWD "eyvoI*yz&{RxCOtmkLY$0M[R"
+#define MY_RF24_CHANNEL (72)
+#define MY_SECURITY_SIMPLE_PASSWD "dell-nox-simple-password"
+
+#define MY_NODE_ID 1
 
 #define DHT_DATA_PIN 3
 #define DHT_TYPE DHT11
@@ -11,7 +13,7 @@
 #include <MySensors.h>
 #include <DHT.h>
 
-static const uint64_t UPDATE_INTERVAL = 7000;
+static const uint64_t UPDATE_INTERVAL = 3000;
 
 #define CHILD_ID_HUM 0
 #define CHILD_ID_TEMP 1
