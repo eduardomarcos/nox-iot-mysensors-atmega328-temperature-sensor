@@ -1,6 +1,7 @@
 #define MY_DEBUG
 #define MY_RADIO_RF24
 
+#define MY_RF24_PA_LEVEL RF24_PA_MIN
 #define MY_RF24_CHANNEL (72)
 #define MY_SECURITY_SIMPLE_PASSWD "dell-nox-simple-password"
 
@@ -13,7 +14,7 @@
 #include <MySensors.h>
 #include <DHT.h>
 
-static const uint64_t UPDATE_INTERVAL = 10000;
+static const uint64_t UPDATE_INTERVAL = 5000;
 
 #define CHILD_ID_HUM 0
 #define CHILD_ID_TEMP 1
