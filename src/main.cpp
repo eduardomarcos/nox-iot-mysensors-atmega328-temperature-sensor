@@ -13,7 +13,7 @@
 #include <MySensors.h>
 #include <DHT.h>
 
-static const uint64_t UPDATE_INTERVAL = 3000;
+static const uint64_t UPDATE_INTERVAL = 10000;
 
 #define CHILD_ID_HUM 0
 #define CHILD_ID_TEMP 1
@@ -24,9 +24,7 @@ DHT dht(DHT_DATA_PIN, DHT_TYPE);
 
 void presentation()
 {
-  sendSketchInfo("TemperatureAndHumidity", "1.0");
-
-  present(CHILD_ID_HUM, S_HUM);
+  sendSketchInfo("TemperatureSensor", "1.0");
   present(CHILD_ID_TEMP, S_TEMP);
 }
 
@@ -37,7 +35,7 @@ void setup()
 
 void loop()
 {
-  delay(2000);
+  wait(2000);
 
   float temperature = dht.readTemperature();
   Serial.print("RAW: ");
