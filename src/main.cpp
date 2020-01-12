@@ -17,15 +17,24 @@
 static const uint64_t UPDATE_INTERVAL = 5000;
 
 #define CHILD_ID_TEMP 1
+#define CHILD_ID_HUM 2
 
 MyMessage msgTemp(CHILD_ID_TEMP, V_TEMP);
+MyMessage msgHum(CHILD_ID_HUM, V_HUM);
 DHT dht(DHT_DATA_PIN, DHT_TYPE);
 
 float lastTemperatureRead = 0;
+float lastHumidityRead = 0;
+
+void readTemperatureAndHumidity();
+void processHumidity(float humidity);
+void processTemperature(float temperature);
+
 void presentation()
 {
   sendSketchInfo("TemperatureSensor", "1.0");
   present(CHILD_ID_TEMP, S_TEMP);
+  present(CHILD_ID_HUM, S_HUM);
 }
 
 void setup()
@@ -35,8 +44,22 @@ void setup()
 
 void loop()
 {
+  readTemperatureAndHumidity();
+  sleep(UPDATE_INTERVAL);
+}
+
+void readTemperatureAndHumidity()
+{
   wait(2000);
   float temperature = dht.readTemperature();
+  float humidity = dht.readHumidity();
+
+  processTemperature(temperature);
+  processHumidity(humidity);
+}
+
+void processTemperature(float temperature)
+{
   if (isnan(temperature))
   {
     Serial.println("Failed reading temperature from DHT!");
@@ -49,5 +72,20 @@ void loop()
       lastTemperatureRead = temperature;
     }
   }
-  sleep(UPDATE_INTERVAL);
+}
+
+void processHumidity(float humidity)
+{
+  if (isnan(humidity))
+  {
+    Serial.println("Failed reading humidity from DHT!");
+  }
+  else
+  {
+    if (humidity != lastHumidityRead)
+    {
+      send(msgHum.set(humidity, 1));
+      lastHumidityRead = humidity;
+    }
+  }
 }
