@@ -16,13 +16,12 @@
 
 static const uint64_t UPDATE_INTERVAL = 5000;
 
-#define CHILD_ID_HUM 0
 #define CHILD_ID_TEMP 1
 
-MyMessage msgHum(CHILD_ID_HUM, V_HUM);
 MyMessage msgTemp(CHILD_ID_TEMP, V_TEMP);
 DHT dht(DHT_DATA_PIN, DHT_TYPE);
 
+float lastTemperatureRead = 0;
 void presentation()
 {
   sendSketchInfo("TemperatureSensor", "1.0");
@@ -37,16 +36,18 @@ void setup()
 void loop()
 {
   wait(2000);
-
   float temperature = dht.readTemperature();
-  Serial.print("RAW: ");
-  Serial.println(temperature);
   if (isnan(temperature))
   {
     Serial.println("Failed reading temperature from DHT!");
   }
-
-  send(msgTemp.set(temperature, 1));
-
+  else
+  {
+    if (temperature != lastTemperatureRead)
+    {
+      send(msgTemp.set(temperature, 1));
+      lastTemperatureRead = temperature;
+    }
+  }
   sleep(UPDATE_INTERVAL);
 }
