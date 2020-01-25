@@ -7,12 +7,10 @@
 
 #define MY_NODE_ID 1
 
-#define DHT_DATA_PIN 3
-#define DHT_TYPE DHT11
-
+#include <Wire.h>
 #include <SPI.h>
 #include <MySensors.h>
-#include <DHT.h>
+#include "AHT10.h"
 
 static const uint64_t UPDATE_INTERVAL = 5000;
 
@@ -21,7 +19,8 @@ static const uint64_t UPDATE_INTERVAL = 5000;
 
 MyMessage msgTemp(CHILD_ID_TEMP, V_TEMP);
 MyMessage msgHum(CHILD_ID_HUM, V_HUM);
-DHT dht(DHT_DATA_PIN, DHT_TYPE);
+
+AHT10 aht10;
 
 float lastTemperatureRead = 0;
 float lastHumidityRead = 0;
@@ -39,7 +38,10 @@ void presentation()
 
 void setup()
 {
-  dht.begin();
+  if (aht10.begin())
+  {
+    Serial.println("AHT10 Connected!");
+  }
 }
 
 void loop()
@@ -51,8 +53,12 @@ void loop()
 void readTemperatureAndHumidity()
 {
   wait(2000);
-  float temperature = dht.readTemperature();
-  float humidity = dht.readHumidity();
+  // float temperature = aht10.readTemperature();
+  float temperature = 29.9;
+  Serial.println("--->Temp:");
+  Serial.println(temperature);
+  // float humidity = aht10.GetHumidity();
+  float humidity = 0;
 
   processTemperature(temperature);
   processHumidity(humidity);
