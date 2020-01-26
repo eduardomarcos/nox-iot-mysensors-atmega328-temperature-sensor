@@ -8,6 +8,7 @@
 
 #include <MySensors.h>
 #include "AHT10.h"
+#include <Battery.h>
 
 static const uint64_t UPDATE_INTERVAL = 5000;
 
@@ -16,12 +17,15 @@ static const uint64_t UPDATE_INTERVAL = 5000;
 
 MyMessage msgTemp(CHILD_ID_TEMP, V_TEMP);
 MyMessage msgHum(CHILD_ID_HUM, V_HUM);
+Battery battery(3000, 4200, A0);
 
 AHT10 aht10;
 
 float lastTemperatureRead = 0;
 float lastHumidityRead = 0;
+int oldBatteryPcnt = 0;
 
+void readBatteryLevel();
 void readTemperatureAndHumidity();
 float roundMeasurement(float val);
 void processHumidity(float humidity);
@@ -36,6 +40,7 @@ void presentation()
 
 void setup()
 {
+  battery.begin(5000, 1.0);
   if (aht10.begin())
   {
     Serial.println("AHT10 Connected!");
@@ -44,13 +49,13 @@ void setup()
 
 void loop()
 {
+  readBatteryLevel();
   readTemperatureAndHumidity();
   sleep(UPDATE_INTERVAL);
 }
 
 void readTemperatureAndHumidity()
 {
-  // wait(2000);
   float temperature = aht10.readTemperature();
   float humidity = aht10.readHumidity();
 
@@ -69,7 +74,6 @@ void processTemperature(float temperature)
     temperature = roundMeasurement(temperature);
     if (temperature != lastTemperatureRead)
     {
-      Serial.println("Sending...");
       send(msgTemp.set(temperature, 1));
       lastTemperatureRead = temperature;
     }
@@ -95,12 +99,23 @@ void processHumidity(float humidity)
 
 float roundMeasurement(float val)
 {
-  Serial.print("\nRounding value: ");
-  Serial.print(val);
   val = val * 10.0f;
   val = (val > (floor(val) + 0.5f)) ? ceil(val) : floor(val);
   val = val / 10.0f;
-  Serial.print(" -> ");
-  Serial.println(val);
   return val;
+}
+
+void readBatteryLevel()
+{
+  int batteryLevel = battery.level();
+  Serial.print("Battery voltage is ");
+  Serial.print(battery.voltage());
+  Serial.print(" (");
+  Serial.print(batteryLevel);
+  Serial.println("%)");
+  if (oldBatteryPcnt != batteryLevel)
+  {
+    sendBatteryLevel(batteryLevel);
+    oldBatteryPcnt = batteryLevel;
+  }
 }
