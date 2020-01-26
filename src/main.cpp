@@ -6,8 +6,6 @@
 
 #define MY_NODE_ID 1
 
-#include <Wire.h>
-#include <SPI.h>
 #include <MySensors.h>
 #include "AHT10.h"
 
