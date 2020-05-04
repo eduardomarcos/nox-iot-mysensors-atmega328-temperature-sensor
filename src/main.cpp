@@ -4,7 +4,7 @@
 #define MY_RF24_PA_LEVEL RF24_PA_MIN
 #define MY_RF24_CHANNEL (72)
 
-#define MY_NODE_ID 1
+#define MY_NODE_ID 3
 
 #include <MySensors.h>
 #include "AHT10.h"
@@ -23,7 +23,7 @@ AHT10 aht10;
 
 float lastTemperatureRead = 0;
 float lastHumidityRead = 0;
-int cyclesWithoutSending = 0;
+uint16_t cyclesWithoutSending = 0;
 
 void readTemperatureAndHumidity();
 float roundMeasurement(float val);
@@ -39,7 +39,11 @@ void presentation()
 
 void setup()
 {
-  analogReference(INTERNAL);
+  while (aht10.begin() != true)
+  {
+    Serial.println(F("AHT10 not connected or fail to load calibration coefficient"));
+    delay(5000);
+  }
 }
 
 void loop()
