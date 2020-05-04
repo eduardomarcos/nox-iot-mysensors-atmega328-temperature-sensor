@@ -10,7 +10,7 @@
 #include "AHT10.h"
 
 // Update interval to send data (milliseconds)
-static const uint64_t UPDATE_INTERVAL = 7000;
+static const uint64_t UPDATE_INTERVAL = 10000;
 static const uint16_t MAX_CYCLES_WITHOUT_SENDING = 10;
 
 #define CHILD_ID_TEMP 1
